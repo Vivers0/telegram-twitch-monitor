@@ -1,0 +1,11 @@
+services:
+  twitch-stream-monitor:
+    build: .
+    container_name: twitch-stream-monitor
+    restart: unless-stopped
+    ports:
+      - "22962:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/usr/src/app/data
