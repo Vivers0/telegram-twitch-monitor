@@ -3,10 +3,38 @@ const express = require('express');
 const { default: fetch } = require('node-fetch');
 const { Telegraf } = require('telegraf');
 const Database = require('better-sqlite3');
+const { HttpsProxyAgent } = require('https-proxy-agent');
+const { SocksProxyAgent } = require('socks-proxy-agent');
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ===== Настройка прокси =====
+function createProxyAgent() {
+    const proxyUrl = process.env.PROXY_URL;
+    if (!proxyUrl) return null;
+
+    try {
+        const protocol = proxyUrl.split('://')[0].toLowerCase();
+
+        if (protocol === 'socks4' || protocol === 'socks5') {
+            console.log(`🌐 Используется SOCKS-прокси (${protocol}): ${proxyUrl}`);
+            return new SocksProxyAgent(proxyUrl);
+        } else if (protocol === 'http' || protocol === 'https') {
+            console.log(`🌐 Используется HTTP(S)-прокси: ${proxyUrl}`);
+            return new HttpsProxyAgent(proxyUrl);
+        } else {
+            console.warn(`⚠️ Неизвестный протокол прокси "${protocol}", прокси не будет использован.`);
+            return null;
+        }
+    } catch (err) {
+        console.error('❌ Ошибка при создании прокси-агента:', err.message);
+        return null;
+    }
+}
+
+const proxyAgent = createProxyAgent();
 
 // Подключение к SQLite
 const db = new Database('database.db');
@@ -49,8 +77,10 @@ function getAllSubscriptions() {
     return db.prepare('SELECT * FROM subscriptions').all();
 }
 
-// Инициализация Telegram-бота
-const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+// Инициализация Telegram-бота (с прокси, если задан)
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN, proxyAgent ? {
+    telegram: { agent: proxyAgent }
+} : {});
 
 // Хранилище последнего состояния стримов
 const streamStatusCache = {};
@@ -59,6 +89,7 @@ const streamStatusCache = {};
 async function getTwitchToken() {
     const res = await fetch('https://id.twitch.tv/oauth2/token', {
         method: 'POST',
+        agent: proxyAgent,
         body: new URLSearchParams({
             client_id: process.env.TWITCH_CLIENT_ID,
             client_secret: process.env.TWITCH_CLIENT_SECRET,
@@ -72,6 +103,7 @@ async function getTwitchToken() {
 // Получить ID канала по имени
 async function getChannelId(token, username) {
     const res = await fetch(`https://api.twitch.tv/helix/users?login=${username}`, {
+        agent: proxyAgent,
         headers: {
             'Client-ID': process.env.TWITCH_CLIENT_ID,
             'Authorization': `Bearer ${token}`
@@ -90,6 +122,7 @@ async function getChannelId(token, username) {
 // Проверяет, стримит ли пользователь
 async function checkStreamStatus(token, channelId) {
     const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${channelId}`, {
+        agent: proxyAgent,
         headers: {
             'Client-ID': process.env.TWITCH_CLIENT_ID,
             'Authorization': `Bearer ${token}`
