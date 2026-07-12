@@ -1,9 +1,9 @@
 {
   "name": "twitch-stream-monitor",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index"
   },
   "keywords": ["nodejs", "docker", "twitch", "monitoring", "telegram-bot", "sqlite", "twitch-api", "notification-system"],
   "author": "Vivers0",

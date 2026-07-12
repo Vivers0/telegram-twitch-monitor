@@ -9,6 +9,9 @@ Telegram-бот, который отслеживает начало стримо
 
 - 🔔 Получение уведомлений о начале стрима
 - 🧩 Команды: `/add`, `/remove`, `/list`
+- 🔗 `/addall` — авторизация через Twitch и добавление всех текущих подписок пользователя одним действием
+- 🆕 Автоматическое обнаружение новых подписок на Twitch с предложением добавить канал в отслеживание (кнопки «Да / Нет»)
+- 🚫 Автоматическое обнаружение отписок на Twitch — канал удаляется из отслеживания с уведомлением
 - 🗃 Хранение данных в локальной БД (SQLite)
 - 🌐 Поддержка прокси (HTTP/HTTPS/SOCKS4/SOCKS5)
 - 🐳 Поддержка Docker и `docker-compose`
@@ -53,14 +56,19 @@ cp .env.example .env
 ```env
 TWITCH_CLIENT_ID=your_client_id
 TWITCH_CLIENT_SECRET=your_client_secret
+TWITCH_REDIRECT_URI=http://localhost:3000/auth/twitch/callback
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 PORT=3000
 INTERVAL=10000
+FOLLOWS_CHECK_INTERVAL=300000
 
 # Опционально: прокси для запросов к Twitch и Telegram API
 # Поддерживаются протоколы: http, https, socks4, socks5
 # PROXY_URL=socks5://user:pass@host:port
 ```
+
+- `TWITCH_REDIRECT_URI` — должен точь-в-точь совпадать со значением, указанным в Twitch Developer Console в разделе **OAuth Redirect URLs**. Используется командой `/addall`.
+- `FOLLOWS_CHECK_INTERVAL` — как часто (в миллисекундах) бот проверяет новые подписки/отписки у пользователей, прошедших `/addall`. По умолчанию `300000` (5 минут).
 
 #### 🌐 Настройка прокси (опционально)
 
@@ -93,28 +101,30 @@ docker-compose up -d
 
 1. Напиши боту в Telegram: `/start`
 2. Добавь канал:
-/add shroud
+`/add shroud`
 3. Удали канал:
-/remove shroud
+`/remove shroud`
 4. Посмотри список отслеживаемых:
-/list
+`/list`
+5. Добавь сразу все каналы, на которые ты подписан на Twitch:
+`/addall`
+Бот пришлёт ссылку для авторизации через Twitch — после подтверждения все текущие подписки добавятся автоматически, а о новых подписках/отписках бот будет сообщать сам.
 
 ---
 
 ## 📁 Структура проекта
+
+```
 twitch-stream-monitor/
-
 ├── index.js              # Основной код бота
-
+├── database.db           # SQLite БД (создаётся автоматически при первом запуске)
 ├── .env.example          # Пример файла с переменными окружения
-
+├── local.env             # (опционально) локальные переопределения, не коммитить
 ├── docker-compose.yml    # Конфиг для Docker Compose
-
 ├── Dockerfile            # Docker-образ
-
 ├── package.json
-
-└── data/                 # Локальное хранилище SQLite БД
+└── data/                 # Локальное хранилище SQLite БД (при запуске через Docker)
+```
 
 ---
 

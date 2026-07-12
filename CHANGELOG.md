@@ -1,13 +1,27 @@
 # Changelog
 
-## [1.1.0] - 2026-06-29
-### Added
+Все значимые изменения этого проекта документируются в этом файле.
 
-    - Добавлено подключение по прокси (SOCKS4, SOCKS5, HTTP, HTTPS)
+## [Unreleased]
+
+### Added
+- Команда `/addall` — авторизация через Twitch (OAuth) и добавление всех каналов, на которые подписан пользователь, в список отслеживания.
+- Фоновая проверка (по умолчанию раз в 5 минут, `FOLLOWS_CHECK_INTERVAL`) новых подписок Twitch у пользователей, прошедших `/addall`: при появлении нового канала бот присылает сообщение с инлайн-кнопками «Да / Нет» для подтверждения добавления в отслеживание.
+- Автоматическое обнаружение отписок от каналов на Twitch: канал удаляется из списка отслеживания, а пользователю приходит уведомление об этом.
 
 ### Changed
+- Обновлена справка команды `/start` — добавлено упоминание `/addall`.
 
-    - README.md
-    - Обновлен Dockerfile - исправлена LTS версия node.js
-    - Обновлены пакеты в package.json
-    - Добавлен allowScripts в package.json
+## [1.1.0] - 2026-06-29
+
+### Added
+- Поддержка подключения через прокси (SOCKS4, SOCKS5, HTTP, HTTPS).
+
+### Changed
+- Обновлён README.md.
+- Исправлена LTS-версия Node.js в Dockerfile.
+- Обновлены пакеты в package.json.
+- Добавлен `allowScripts` в package.json.
+
+[Unreleased]: https://github.com/Vivers0/twitch-stream-monitor/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Vivers0/twitch-stream-monitor/releases/tag/v1.1.0
