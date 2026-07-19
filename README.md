@@ -70,6 +70,16 @@ FOLLOWS_CHECK_INTERVAL=300000
 - `TWITCH_REDIRECT_URI` — должен точь-в-точь совпадать со значением, указанным в Twitch Developer Console в разделе **OAuth Redirect URLs**. Используется командой `/addall`.
 - `FOLLOWS_CHECK_INTERVAL` — как часто (в миллисекундах) бот проверяет новые подписки/отписки у пользователей, прошедших `/addall`. По умолчанию `300000` (5 минут).
 
+#### 🌱 Файлы окружения (`.env`, `local.env`, `<NODE_ENV>.env`)
+
+Бот умеет читать несколько файлов окружения с таким приоритетом (каждый следующий перекрывает предыдущий):
+
+1. `.env` — базовый файл, читается всегда.
+2. `<NODE_ENV>.env` — например, `development.env` или `production.env`, подхватывается только если задана переменная окружения `NODE_ENV` (например, `NODE_ENV=development node index.js`).
+3. `local.env` — локальные переопределения, которые не должны попадать в git (добавьте в `.gitignore`); имеют наивысший приоритет.
+
+Файл нужно класть в корень проекта — там же, откуда запускается `node index.js`.
+
 #### 🌐 Настройка прокси (опционально)
 
 Если бот развернут в регионе, где Twitch или Telegram API недоступны напрямую, можно указать прокси через переменную `PROXY_URL`. Поддерживаемые форматы:
@@ -101,13 +111,13 @@ docker-compose up -d
 
 1. Напиши боту в Telegram: `/start`
 2. Добавь канал:
-`/add shroud`
+/add shroud
 3. Удали канал:
-`/remove shroud`
+/remove shroud
 4. Посмотри список отслеживаемых:
-`/list`
+/list
 5. Добавь сразу все каналы, на которые ты подписан на Twitch:
-`/addall`
+/addall
 Бот пришлёт ссылку для авторизации через Twitch — после подтверждения все текущие подписки добавятся автоматически, а о новых подписках/отписках бот будет сообщать сам.
 
 ---
@@ -116,14 +126,35 @@ docker-compose up -d
 
 ```
 twitch-stream-monitor/
-├── index.js              # Основной код бота
-├── database.db           # SQLite БД (создаётся автоматически при первом запуске)
-├── .env.example          # Пример файла с переменными окружения
-├── local.env             # (опционально) локальные переопределения, не коммитить
-├── docker-compose.yml    # Конфиг для Docker Compose
-├── Dockerfile            # Docker-образ
+├── index.js                  # Точка входа: собирает и запускает приложение
+├── src/
+│   ├── config.js             # Загрузка env-файлов, валидация, все настройки
+│   ├── proxy.js              # Создание прокси-агента (HTTP/SOCKS)
+│   ├── db/
+│   │   ├── index.js          # Подключение к SQLite + схема таблиц
+│   │   ├── subscriptions.js  # Пользователи и отслеживаемые каналы
+│   │   ├── twitchAccounts.js # OAuth-токены Twitch-аккаунтов
+│   │   └── followedSeen.js   # Снимок известных подписок Twitch
+│   ├── twitch/
+│   │   ├── auth.js           # Токены: app token, OAuth-обмен, refresh
+│   │   └── api.js            # Запросы к Twitch Helix API
+│   ├── bot/
+│   │   ├── index.js          # Создание Telegram-бота
+│   │   ├── commands.js       # /start /add /remove /list /addall
+│   │   ├── actions.js        # Инлайн-кнопки «Да / Нет»
+│   │   └── oauthState.js     # Одноразовые state для OAuth-ссылок
+│   ├── jobs/
+│   │   ├── streamMonitor.js  # Периодическая проверка стримов
+│   │   └── followsSync.js    # Синхронизация подписок/отписок Twitch
+│   └── server/
+│       └── index.js          # Express: OAuth-колбэк, /health
+├── database.db               # SQLite БД (создаётся автоматически)
+├── example.env               # Пример файла с переменными окружения
+├── local.env                 # (опционально) локальные переопределения, не коммитить
+├── docker-compose.yml        # Конфиг для Docker Compose
+├── Dockerfile                # Docker-образ
 ├── package.json
-└── data/                 # Локальное хранилище SQLite БД (при запуске через Docker)
+└── data/                     # Хранилище SQLite БД (при запуске через Docker)
 ```
 
 ---
