@@ -1,6 +1,5 @@
 const { default: fetch } = require('node-fetch');
 const config = require('../config');
-const proxyAgent = require('../proxy');
 const { saveTwitchAccount } = require('../db/twitchAccounts');
 
 const TOKEN_URL = 'https://id.twitch.tv/oauth2/token';
@@ -8,7 +7,6 @@ const TOKEN_URL = 'https://id.twitch.tv/oauth2/token';
 async function tokenRequest(params) {
     const res = await fetch(TOKEN_URL, {
         method: 'POST',
-        agent: proxyAgent,
         body: new URLSearchParams({
             client_id: config.twitch.clientId,
             client_secret: config.twitch.clientSecret,

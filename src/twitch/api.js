@@ -1,6 +1,5 @@
 const { default: fetch } = require('node-fetch');
 const config = require('../config');
-const proxyAgent = require('../proxy');
 
 const HELIX = 'https://api.twitch.tv/helix';
 
@@ -14,7 +13,6 @@ function helixHeaders(accessToken) {
 // Получить Twitch user_id владельца пользовательского токена
 async function getSelfUserId(userAccessToken) {
     const res = await fetch(`${HELIX}/users`, {
-        agent: proxyAgent,
         headers: helixHeaders(userAccessToken)
     });
     if (!res.ok) return null;
@@ -27,7 +25,6 @@ async function getSelfUserId(userAccessToken) {
 // Получить ID канала по имени (null — канал не найден или ошибка)
 async function getChannelId(appToken, username) {
     const res = await fetch(`${HELIX}/users?login=${encodeURIComponent(username)}`, {
-        agent: proxyAgent,
         headers: helixHeaders(appToken)
     });
     if (!res.ok) return null;
@@ -41,7 +38,6 @@ async function getChannelId(appToken, username) {
 // (null важен: ошибка не должна трактоваться как "стрим закончился")
 async function isStreaming(appToken, channelId) {
     const res = await fetch(`${HELIX}/streams?user_id=${encodeURIComponent(channelId)}`, {
-        agent: proxyAgent,
         headers: helixHeaders(appToken)
     });
 
@@ -67,8 +63,7 @@ async function getFollowedChannels(userAccessToken, userId) {
         if (cursor) url.searchParams.set('after', cursor);
 
         const res = await fetch(url.toString(), {
-            agent: proxyAgent,
-            headers: helixHeaders(userAccessToken)
+                headers: helixHeaders(userAccessToken)
         });
 
         if (!res.ok) {
