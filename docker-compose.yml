@@ -1,10 +1,16 @@
+# Базовая конфигурация — общая для всех окружений.
+# Специфичные для машины настройки (проброс порта или docker-сеть)
+# задаются в docker-compose.override.yml, который Compose подхватывает
+# автоматически и накладывает поверх этого файла.
+#
+# Быстрый старт:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#   docker compose up -d --build
 services:
   twitch-stream-monitor:
     build: .
     container_name: twitch-stream-monitor
     restart: unless-stopped
-    ports:
-      - "22962:3000"
     env_file:
       - .env
     volumes:

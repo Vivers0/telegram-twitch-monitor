@@ -1,0 +1,20 @@
+# Вариант B — общая docker-сеть с reverse proxy.
+# NPM запущен в Docker на ЭТОМ ЖЕ сервере. Порт наружу не публикуется.
+#
+# Использование:
+#   1. Узнайте имя сети, в которой работает ваш NPM:
+#        docker inspect <контейнер_NPM> \
+#          --format '{{range $net,$c := .NetworkSettings.Networks}}{{$net}}{{"\n"}}{{end}}'
+#   2. Замените REPLACE_WITH_NPM_NETWORK на это имя в двух местах ниже.
+#   3. cp docker-compose.override.npm-network.example.yml docker-compose.override.yml
+#   4. docker compose up -d --build
+#
+# В NPM: Forward Hostname = twitch-stream-monitor, Forward Port = 3000.
+services:
+  twitch-stream-monitor:
+    networks:
+      - REPLACE_WITH_NPM_NETWORK
+
+networks:
+  REPLACE_WITH_NPM_NETWORK:
+    external: true

@@ -1,5 +1,21 @@
 node_modules
+
+# Локальная БД (SQLite + WAL)
 *.db
-*.db-*
+*.db-shm
+*.db-wal
+data/
+
+# Файлы окружения — игнорируем все, кроме примера
 *.env
 !example.env
+
+# Локальный docker-compose override — у каждого свой (порт/сеть под свою машину).
+# В репозитории лежат только примеры:
+#   docker-compose.override.example.yml            — вариант с пробросом порта
+#   docker-compose.override.npm-network.example.yml — вариант с общей docker-сетью
+docker-compose.override.yml
+
+# Логи
+*.log
+npm-debug.log*

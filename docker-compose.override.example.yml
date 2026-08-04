@@ -1,0 +1,14 @@
+# Вариант A — проброс порта на хост.
+# Reverse proxy (NPM) на другой машине/ВМ либо вне общей docker-сети.
+#
+# Использование:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#   docker compose up -d --build
+#
+# В NPM: Forward Hostname = IP этого сервера, Forward Port = 22962.
+services:
+  twitch-stream-monitor:
+    ports:
+      # ХОСТ:КОНТЕЙНЕР — левое число должно совпадать с Forward Port в NPM,
+      # правое (3000) — порт приложения внутри контейнера.
+      - "22962:3000"
